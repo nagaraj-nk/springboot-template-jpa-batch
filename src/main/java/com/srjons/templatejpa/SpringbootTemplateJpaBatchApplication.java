@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SpringbootTemplateJpaApplication {
+public class SpringbootTemplateJpaBatchApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SpringbootTemplateJpaApplication.class, args);
+		SpringApplication.run(SpringbootTemplateJpaBatchApplication.class, args);
 	}
 
 }
