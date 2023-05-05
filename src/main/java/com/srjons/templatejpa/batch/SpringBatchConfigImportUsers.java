@@ -2,7 +2,6 @@ package com.srjons.templatejpa.batch;
 
 import com.srjons.templatejpa.entity.User;
 import com.srjons.templatejpa.repo.UserRepo;
-import lombok.AllArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -14,6 +13,7 @@ import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
@@ -22,9 +22,11 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
-@AllArgsConstructor
-public class SpringBatchConfig {
+public class SpringBatchConfigImportUsers {
 
+    private static final int MAX_CHUNK = 100;
+
+    @Autowired
     private UserRepo userRepo;
 
     @Bean
@@ -70,7 +72,7 @@ public class SpringBatchConfig {
     @Bean
     public Step step1(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("csv-step",jobRepository).
-                <User, User>chunk(10,transactionManager)
+                <User, User>chunk(MAX_CHUNK,transactionManager)
                 .reader(reader())
                 .processor(processor())
                 .writer(writer())
@@ -78,7 +80,7 @@ public class SpringBatchConfig {
                 .build();
     }
 
-    @Bean
+    @Bean("importJob")
     public Job runJob(JobRepository jobRepository,PlatformTransactionManager transactionManager) {
         return new JobBuilder("importUsers",jobRepository)
                 .flow(step1(jobRepository,transactionManager)).end().build();

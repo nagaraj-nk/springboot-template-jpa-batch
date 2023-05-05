@@ -9,6 +9,7 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,12 @@ public class JobController {
     private JobLauncher jobLauncher;
 
     @Autowired
+    @Qualifier("importJob")
     private Job job;
+
+    @Autowired
+    @Qualifier("exportJob")
+    private Job exportJob;
 
     @GetMapping(value = "/importUsers", produces = MediaType.APPLICATION_JSON_VALUE)
     public String importCsvToDBJob() {
@@ -35,6 +41,20 @@ public class JobController {
                  JobParametersInvalidException e) {
             e.printStackTrace();
         }
-        return "Job Started";
+        return "Import Job Started";
+    }
+
+
+    @GetMapping(value = "/exportUsers", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String exportCsvToDBJob() {
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addLong("startAt", System.currentTimeMillis()).toJobParameters();
+        try {
+            jobLauncher.run(exportJob, jobParameters);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException |
+                 JobParametersInvalidException e) {
+            e.printStackTrace();
+        }
+        return "Export Job Started";
     }
 }
